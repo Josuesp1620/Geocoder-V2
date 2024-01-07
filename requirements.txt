@@ -1,6 +1,3 @@
-addok==1.1.1
-addok-es @ git+https://github.com/frodrigo/addok-es.git@208ab51e463925f5036d710e450f31d52ac44a41
-addok-spain @ git+https://github.com/frodrigo/addok-spain.git@fffa613f33f04279cac127ef26587e5c802135e8
 async-timeout==4.0.3
 blinker==1.7.0
 click==8.1.7
