@@ -6,11 +6,21 @@ from geocode.config import config, hooks
 from .base import CorsMiddleware
 
 config.load()
-app = Flask(__name__)
+application = Flask(__name__)
 middlewares = [CorsMiddleware()]
 hooks.register_http_middleware(middlewares)
-CORS(app)
-hooks.register_http_endpoint(app)
+CORS(application)
+hooks.register_http_endpoint(application)
+
+# def simple(args):
+#     app.run(host="0.0.0.0", port=7878)
 
 def simple(args):
-    app.run(host="0.0.0.0", port=7878)
+    from wsgiref.simple_server import make_server
+
+    httpd = make_server(args.host, int(args.port), app)
+    print("Serving HTTP on {}:{}…".format(args.host, args.port))
+    try:
+        httpd.serve_forever()
+    except (KeyboardInterrupt, EOFError):
+        print("Bye!")
