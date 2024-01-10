@@ -320,3 +320,4 @@ def make_labels(helper, result):
                 if housenumber:
                     add(labels, "{}, {}, {} {}".format(label, housenumber, postcode, city))
         result.labels.extend(labels)
+        
