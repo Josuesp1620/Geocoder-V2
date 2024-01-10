@@ -49,3 +49,5 @@ ENV/
 # Exclude files
 .env
 .python-version
+logs/
+data/

@@ -233,3 +233,4 @@ if __name__ == '__main__' :
     words = ['X','xplosion','escalera','scalera','mi','tu','su','te','ochooomiiiillllllll','complicado','ácaro','ácido','clown','down','col','clon','waterpolo','aquino','rebosar','rebozar','grajea','gragea','encima','enzima','alhamar','abollar','aboyar','huevo','webo','macho','xocolate','chocolate','axioma','abedul','a','gengibre','yema','wHISKY','google','xilófono','web','guerra','pingüino','si','ke','que','tu','gato','gitano','queso','paquete','cuco','perro','pero','arrebato','hola', 'zapato', 'españa', 'garrulo', 'expansión', 'membrillo', 'jamón','risa','caricia', 'llaves', 'paella','cerilla']
     for s in words:
         print(s, ' -> ', pa.metaphone(s))
+        
