@@ -61,6 +61,7 @@ BATCH_PROCESSORS_PYPATHS = [
     "geocode.core.ds.store_documents",
     "geocode.helpers.index.index_documents",
 ]
+
 BATCH_FILE_LOADER_PYPATH = "geocode.helpers.load_file"
 BATCH_CHUNK_SIZE = 1000
 # During imports, workers are consuming RAM;

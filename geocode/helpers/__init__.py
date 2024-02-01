@@ -52,7 +52,7 @@ def import_by_path(path):
     if not isinstance(path, str):
         return path
     module_path, *name = path.rsplit(".", 1)
-    print(path)
+    # print(path)
     func = import_module(module_path)
     if name:
         func = getattr(func, name[0])

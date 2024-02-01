@@ -51,3 +51,4 @@ ENV/
 .python-version
 logs/
 data/
+redis-data/

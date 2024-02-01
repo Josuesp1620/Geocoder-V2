@@ -1,4 +1,5 @@
 def geojson(result):
+    
     properties = {
         "label": str(result),
     }
@@ -14,7 +15,8 @@ def geojson(result):
         properties[type_] = properties.get("name")
     housenumber = getattr(result, "housenumber", None)
     if housenumber:
-        properties["name"] = "{} {}".format(housenumber, properties.get("name"))
+        properties["name"] = "{} {}".format(properties.get("name"), housenumber)
+        properties["label"] = properties["name"]
     if result.bbox:
         properties["bbox"] = eval(result.bbox)
     try:
@@ -25,7 +27,7 @@ def geojson(result):
         "type": "Feature",
         "geometry": {
             "type": "Point",
-            "coordinates": [float(result.lon), float(result.lat)],
+            "coordinates": [float(result.lat), float(result.lon)],
         },
         
         "properties": properties,

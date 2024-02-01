@@ -49,7 +49,7 @@ class Config(dict):
             else:
                 version = "?"
             plugins.append("{}=={}".format(name, version))
-        print("Loaded plugins:\n{}".format(", ".join(plugins)))
+        # print("Loaded plugins:\n{}".format(", ".join(plugins)))
 
     def on_load(self, func):
         self._post_load_func.append(func)
@@ -67,7 +67,7 @@ class Config(dict):
 
     def load_local(self):
         path = os.environ.get("ADDOK_CONFIG_MODULE") or os.path.join(
-            "./", "geocode.conf"
+            "/etc", "geocoder", "geocoder.conf"
         )
         if not os.path.exists(path):
             print('No local config file found in "{}".'.format(path))

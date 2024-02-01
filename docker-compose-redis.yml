@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  redis-geocoder:
+    container_name: redis-geocoder
+    image: redis:latest
+    volumes:
+      - ./redis-data:/data
+    ports:
+      - "6379:6379"
