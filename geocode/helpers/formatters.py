@@ -10,13 +10,18 @@ def geojson(result):
         val = getattr(result, key, None)
         if val and key not in ["lat", "lon", "_id", "bbox"]:
             properties[key] = val
-    type_ = result._doc.get("type")
-    if type_ and type_ not in properties:
-        properties[type_] = properties.get("name")
+    
     housenumber = getattr(result, "housenumber", None)
     if housenumber:
         properties["name"] = "{} {}".format(properties.get("name"), housenumber)
         properties["label"] = properties["name"]
+
+    type_ = result._doc.get("type")
+
+    if type_ and type_ not in properties:
+        properties[type_] = properties.get("name")
+        if type_ == "manzana_lote" or type_ == "manzana":
+            properties["label"] = properties["nombre_urbanizacion"] + ' ' + properties["name"]
     if result.bbox:
         properties["bbox"] = eval(result.bbox)
     try:
