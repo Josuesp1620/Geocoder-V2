@@ -20,6 +20,23 @@ def geojson(result):
 
     if type_ and type_ not in properties:
         properties[type_] = properties.get("name")
+        if type_ == "postcode":
+            if len(str(properties[type_])) == 5:
+                properties["postcode"] = '0'+str(properties[type_])
+
+        if type_ == "cod_departament":
+            if len(str(properties[type_])) == 1:
+                properties["cod_departament"] = '0'+str(properties[type_])
+
+        if type_ == "cod_province":
+            if len(str(properties[type_])) == 1:
+                properties["cod_province"] = '0'+str(properties[type_])
+        
+        if type_ == "cod_district":
+            if len(str(properties[type_])) == 1:
+                properties["cod_district"] = '0'+str(properties[type_])
+
+
         if type_ == "manzana_lote" or type_ == "manzana":
             properties["label"] = properties["nombre_urbanizacion"] + ' ' + properties["name"]
     if result.bbox:

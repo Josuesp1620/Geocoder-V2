@@ -90,7 +90,10 @@ class View:
         if 'filters' in req.json:
             for name in config.FILTERS:
                 if name in req.json['filters']:
-                    filters[name] = str(req.json['filters'][name])
+                    if name in ["postcode", "cod_departament", "cod_province", "cod_district"]:
+                        filters[name] = str(int(req.json['filters'][name]))
+                    else:
+                        req.json['filters'][name]
         return filters
 
     def render(
