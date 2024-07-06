@@ -20,25 +20,41 @@ def geojson(result):
 
     if type_ and type_ not in properties:
         properties[type_] = properties.get("name")
-        if type_ == "postcode":
-            if len(str(properties[type_])) == 5:
-                properties["postcode"] = '0'+str(properties[type_])
-
-        if type_ == "cod_departament":
-            if len(str(properties[type_])) == 1:
-                properties["cod_departament"] = '0'+str(properties[type_])
-
-        if type_ == "cod_province":
-            if len(str(properties[type_])) == 1:
-                properties["cod_province"] = '0'+str(properties[type_])
-        
-        if type_ == "cod_district":
-            if len(str(properties[type_])) == 1:
-                properties["cod_district"] = '0'+str(properties[type_])
-
 
         if type_ == "manzana_lote" or type_ == "manzana":
             properties["label"] = properties["nombre_urbanizacion"] + ' ' + properties["name"]
+
+    if result.postcode:
+        if len(str(result.postcode)) == 5:
+            properties["postcode"] = '0'+str(result.postcode)
+        if len(str(result.postcode)) == 1:
+            properties["postcode"] = '0'+str(result.postcode)
+        if len(str(result.postcode)) == 3:
+            properties["postcode"] = '0'+str(result.postcode)
+
+
+
+
+    if result.cod_departament:
+        if len(str(result.cod_departament)) == 1:
+            properties["cod_departament"] = '0'+str(result.cod_departament)
+        else:
+            properties["cod_departament"] = str(result.cod_departament)
+
+    if result.cod_province:
+        if len(str(result.cod_province)) == 1:
+            properties["cod_province"] = '0'+str(result.cod_province)
+        else:
+            properties["cod_province"] = str(result.cod_province)
+
+
+    if result.cod_district:
+        if len(str(result.cod_district)) == 1:
+            properties["cod_district"] = '0'+str(result.cod_district)
+        else:
+            properties["cod_district"] = str(result.cod_district)
+
+
     if result.bbox:
         properties["bbox"] = eval(result.bbox)
     try:

@@ -3,8 +3,12 @@ import logging.handlers
 from pathlib import Path
 import time
 
-from flask import request, Response, jsonify
+# from flask import request, Response, jsonify
 from werkzeug.exceptions import InternalServerError
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from geocode.config import config
 from geocode.core.core import reverse, search
@@ -74,89 +78,83 @@ def log_slow_query(query, results, timer):
             id_ = "-"
         slow_query_logger.debug("\t".join([str(timer), query, id_, result, score]))
 
-
-class CorsMiddleware:
-    def process_response(self, req, resp, resource, req_succeeded):
-        resp.set_header("Access-Control-Allow-Origin", "*")
-        resp.set_header("Access-Control-Allow-Headers", "X-Requested-With")
-
-
 class View:
-
     config = config
 
-    def match_filters(self, req):
+    def match_filters(self, body):
         filters = {}
-        if 'filters' in req.json:
-            for name in config.FILTERS:
-                if name in req.json['filters']:
+        print("'filters' in body")
+        print(config.FILTERS)
+        if 'filters' in body:
+            for name in ["postcode", "cod_departament", "cod_province", "cod_district", "type"]:
+                if name in body.get('filters'):
                     if name in ["postcode", "cod_departament", "cod_province", "cod_district"]:
-                        filters[name] = str(int(req.json['filters'][name]))
+                        filters[name] = str(int(body.get('filters')[name]))
                     else:
-                        req.json['filters'][name]
+                        filters[name] = str(body.get('filters')[name])
         return filters
 
-    def render(
-        self, req, resp, results, query=None, filters=None, center=None, limit=None
-    ):
-        results = {
+
+    def render(self, results, query=None, filters=None, center=None, limit=None):
+        response_data = {
             "type": "FeatureCollection",
             "version": "draft",
             "features": [r.format() for r in results],
             "attribution": config.ATTRIBUTION
         }
         if query:
-            results["query"] = query
+            response_data["query"] = query
         if filters:
-            results["filters"] = filters
+            response_data["filters"] = filters
         if center:
-            results["center"] = center
+            response_data["center"] = center
         if limit:
-            results["limit"] = limit
-        return self.json(results)
+            response_data["limit"] = limit
+        return response_data
 
-    to_geojson = render  # retrocompat.
-
-    def json(self, content):
-        return jsonify(content), 200
-
-    def parse_float(sel, req, *keys):
+    async def parse_float(self, body, *keys):
         try:
             for key in keys:
-                val = req.json[key]
+                val = body.get(key)
                 if val is not None:
                     return float(val)
         except (ValueError, TypeError) as e:
             raise InternalServerError(f"invalid value: {key}") from e
         return None
 
-    def parse_lon_lat(self, req):
-        lat = self.parse_float(req, "lat", "latitude")
-        lon = self.parse_float(req, "lon", "lng", "long", "longitude")
+    async def parse_lon_lat(self, body):
+        lat = await self.parse_float(body, "lat", "latitude")
+        lon = await self.parse_float(body, "lon", "lng", "long", "longitude")
 
         if lon and (lon > 180 or lon < -180):
             raise InternalServerError("out of range lon")
-        
+
         elif lat and (lat > 90 or lat < -90):
             raise InternalServerError("out of range lat")
         return lon, lat
     
 class Search(View):
-    def on_post(self, req, resp):
+    async def on_post(self, req: Request):
+        body = await req.json()
+        keys = body.keys()
 
-        body_params = req.json.keys()
-        query = req.json['query']
-        limit = req.json['limit'] if 'limit' in body_params else 5
-        autocomplete = req.json['autocomplete'] if 'autocomplete' in body_params else False
+        query = body.get('query')
+        limit = body.get('limit') if 'limit' in keys else 5
+        autocomplete = body.get('autocomplete') if 'autocomplete' in keys else False
+        
         lon = None
         lat = None
-        if "lat" in body_params and "lon" in body_params:
-            lon, lat = self.parse_lon_lat(req)
+
+        if "lat" in keys and "lon" in keys:
+            lon, lat = await self.parse_lon_lat(body)
 
         center = None
+
         if lon and lat:
             center = (lon, lat)
-        filters = self.match_filters(req)
+
+        filters = self.match_filters(body)
+                
         timer = time.perf_counter()
         try:
             results = search(
@@ -173,46 +171,48 @@ class Search(View):
         if not results:
             log_notfound(query)
         log_query(query, results)
+        print("results", results)
         if config.SLOW_QUERIES and timer > config.SLOW_QUERIES:
             log_slow_query(query, results, timer)
-        return self.render(
-            req, resp, results, query=query, filters=filters, center=center, limit=limit
-        )
+        return self.render(results, query=query, filters=filters, center=center, limit=limit)
 
 
 class Reverse(View):
-    def on_post(self, req, resp, **kwargs):
-        body_params = req.json.keys()
-        lon, lat = self.parse_lon_lat(req)
-        if lon is None:
-             raise InternalServerError("lon")
-        if lat is None:
-             raise InternalServerError("lat")
-        limit = req.json['limit'] if 'limit' in body_params else 1
-        filters = self.match_filters(req)
+    async def on_post(self, req: Request):        
+        body = await req.json()
+        keys = body.keys()
+        lon, lat = await self.parse_lon_lat(body)
+
+        if lon is None or lat is None:
+            raise HTTPException(status_code=500, detail="Invalid lon or lat")
+
+        limit = body.get("limit") if "limit" in keys else 1
+        filters = self.match_filters(body)
+
         results = reverse(lat=lat, lon=lon, limit=limit, **filters)
-        return self.render(req, resp, results, filters=filters, limit=limit)
+        return self.render(results, filters=filters, limit=limit)
 
 
 class Health(View):
-    def on_get(self, req, resp):
-        return self.json(
-            req,
-            resp,
-            {"status": "HEALTHY", "redis_version": DB.info().get("redis_version")},
+    def on_get(self, req: Request):
+        return JSONResponse(
+            status_code=200,
+            content={"status": "HEALTHY", "redis_version": DB.info().get("redis_version")},
         )
 
-def register_http_endpoint(api):
-    @api.route('/')
-    def index():
-        return 'Hello, World!'
-    @api.route('/search', methods=["POST"])
-    def search():
-        return Search().on_post(request, Response)
-    @api.route('/reverse', methods=["POST"])
-    def reverse():
-        return Reverse().on_post(request, Response)
+def register_http_endpoint(app):
+    # Registros de endpoints
+    @app.get("/")
+    async def read_root():
+        return {"Hello": "World"}
 
+    @app.post("/search")
+    async def search_view(req: Request):
+        return await Search().on_post(req)
+
+    @app.post("/reverse")
+    async def reverse_view(req: Request):
+        return await Reverse().on_post(req)
 
 def register_command(subparsers):
     parser = subparsers.add_parser("serve", help="Run debug server")

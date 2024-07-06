@@ -21,7 +21,7 @@ def index_edge_ngrams(pipe, token):
 
 def deindex_edge_ngrams(token):
     for ngram in compute_edge_ngrams(token):
-        DB.set srem(edge_ngram_key(ngram), token)
+        DB.srem(edge_ngram_key(ngram), token)
 
 
 class EdgeNgramIndexer:
