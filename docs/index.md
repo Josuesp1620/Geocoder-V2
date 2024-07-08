@@ -4,7 +4,7 @@
 
 ## Descripción General
 
-Addok funciona con Redis como backend.
+Geocoder funciona con Redis como backend.
 
 - ofrece una API mínima basada en GeoJSON (con Fast Api)
 - realiza geocodificación inversa
