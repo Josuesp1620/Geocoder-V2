@@ -2,23 +2,23 @@
 
 ## Registrar tu archivo de configuración personalizado
 
-Un archivo de configuración de Addok es simplemente un archivo Python que define algunas claves. La ubicación predeterminada es `/etc/addok/addok.conf`. Pero puede estar en cualquier otro lugar de tu sistema, y necesitas definir una variable de entorno que apunte a él si quieres una ubicación especial:
+Un archivo de configuración de geocoder es simplemente un archivo Python que define algunas claves. La ubicación predeterminada es `/etc/geocoder/geocoder.conf`. Pero puede estar en cualquier otro lugar de tu sistema, y necesitas definir una variable de entorno que apunte a él si quieres una ubicación especial:
 
-    export ADDOK_CONFIG_MODULE=path/to/local.py
+    export geocoder_CONFIG_MODULE=path/to/local.py
 
-También puedes usar el argumento `--config` al ejecutar la línea de comandos `addok`.
+También puedes usar el argumento `--config` al ejecutar la línea de comandos `geocoder`.
 
 El archivo de configuración predeterminado está en `geocoder/config/default.py`.
 
 ## Usar variables de entorno
 
-Cualquier clave de configuración específica se puede declarar usando una variable de entorno, usando la clave en sí, precedida por `ADDOK_`. Por ejemplo, para anular `BATCH_WORKERS`, uno puede hacer algo como esto:
+Cualquier clave de configuración específica se puede declarar usando una variable de entorno, usando la clave en sí, precedida por `geocoder_`. Por ejemplo, para anular `BATCH_WORKERS`, uno puede hacer algo como esto:
 
-    ADDOK_BATCH_WORKERS=12 addok batch
+    geocoder_BATCH_WORKERS=12 geocoder batch
 
 ## Configuración del entorno
 
-Algunas configuraciones se utilizan para definir cómo Addok manejará el sistema en el que está instalado.
+Algunas configuraciones se utilizan para definir cómo geocoder manejará el sistema en el que está instalado.
 
 #### REDIS (dict)
 Define la configuración de la base de datos Redis:
@@ -63,12 +63,12 @@ Y, por supuesto, lo mismo para el puerto.
 Para usar Redis a través de un socket Unix, utiliza la clave `unix_socket_path`.
 
 #### LOG_DIR (ruta)
-Ruta al directorio donde Addok escribirá sus archivos de registro e historial. También
-se puede anular desde la variable de entorno `ADDOK_LOG_DIR`.
+Ruta al directorio donde geocoder escribirá sus archivos de registro e historial. También
+se puede anular desde la variable de entorno `geocoder_LOG_DIR`.
 
     LOG_DIR = 'path/to/dir'
 
-Esta configuración predeterminada es la carpeta raíz del paquete addok.
+Esta configuración predeterminada es la carpeta raíz del paquete geocoder.
 
 ## Configuraciones básicas
 
@@ -184,7 +184,7 @@ la importación y devolver un iterable.
 
     BATCH_FILE_LOADER_PYPATH = "geocode.helpers.load_file"
 
-Addok proporciona tres cargadores: `load_file`, `load_msgpack_file`
+geocoder proporciona tres cargadores: `load_file`, `load_msgpack_file`
 (necesita `msgpack-python`) y `load_csv_file`. Pero puedes pasar cualquier ruta a
 una función cargable. Esta función tomará una `filepath` como argumento, y
 debería generar dicts.
@@ -200,14 +200,14 @@ Todos los métodos llamados durante el proceso por lotes.
     ]
 
 #### BUCKET_MIN (int)
-El número mínimo de elementos que Addok intentará buscar en Redis antes de calificar y
+El número mínimo de elementos que geocoder intentará buscar en Redis antes de calificar y
 ordenarlos. Ten en cuenta que **este no es el número de resultados devueltos**.
 Esto puede impactar mucho en el rendimiento.
 
     BUCKET_MIN = 10
 
 #### BUCKET_MAX (int)
-El número máximo de elementos que Addok intentará buscar en Redis antes de calificar y
+El número máximo de elementos que geocoder intentará buscar en Redis antes de calificar y
 ordenarlos. Ten en cuenta que **este no es el número de resultados devueltos**.
 Esto puede impactar mucho en el rendimiento.
 
@@ -300,7 +300,7 @@ Procesadores adicionales que se ejecutan solo en el momento de la consulta. Por 
     )
 
 #### RESULTS_COLLECTORS_PYPATHS (iterable de rutas de Python)
-Addok intentará cada uno de estos en el orden dado para buscar resultados coincidentes.
+geocoder intentará cada uno de estos en el orden dado para buscar resultados coincidentes.
 
     RESULTS_COLLECTORS_PYPATHS = [
         "geocode.core.autocomplete.only_commons_but_geohash_try_autocomplete_collector",
