@@ -55,7 +55,7 @@
 
 6. Verificar la instalacion:
 ```bash
-        docker –version
+        docker --version
 ```
 
 
